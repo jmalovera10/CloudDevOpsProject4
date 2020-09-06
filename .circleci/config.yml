@@ -36,11 +36,35 @@ jobs:
             npm i
             npm run build
 
-#  test-frontend:
+  test-frontend:
+    docker:
+      - image: cimg/node:12.16
+    requires:
+      - build-frontend
+    steps:
+      - checkout
+      - run:
+          name: Build backend
+          command: |
+            cd frontend
+            npm i
+            npm test
 
-#  est-backend:
+  test-backend:
+    docker:
+      - image: cimg/node:12.16
+    requires:
+      - build-backend
+    steps:
+      - checkout
+      - run:
+          name: Build backend
+          command: |
+            cd backend
+            npm i
+            npm test
 
-#  can-frontend:
+#  scan-frontend:
 
 #  scan-backend:
 
@@ -63,3 +87,5 @@ workflows:
     jobs:
       - build-frontend
       - build-backend
+      - test-frontend
+      - test-backend
