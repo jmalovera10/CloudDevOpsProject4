@@ -74,15 +74,15 @@ jobs:
 
   scan-backend:
     docker:
-        - image: cimg/node:12.16
-      steps:
-        - checkout
-        - run:
-            name: Scan vulnerabilities backend
-            command: |
-              cd backend
-              npm i
-              npm audit --audit-level=critical
+      - image: cimg/node:12.16
+    steps:
+      - checkout
+      - run:
+          name: Scan vulnerabilities backend
+          command: |
+            cd backend
+            npm i
+            npm audit --audit-level=critical
 
 #  deploy-infrastructure:
 
