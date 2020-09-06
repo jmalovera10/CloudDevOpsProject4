@@ -28,7 +28,7 @@ jobs:
       - slack/status:
           fail_only: true
           only_for_branches: master
-          webhook: https://hooks.slack.com/services/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
+          webhook: "${SLACK_WEBHOOK}"
 
   build-backend:
     docker:
@@ -44,7 +44,7 @@ jobs:
       - slack/status:
           fail_only: true
           only_for_branches: master
-          webhook: https://hooks.slack.com/services/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
+          webhook: "${SLACK_WEBHOOK}"
 
   test-frontend:
     docker:
@@ -60,7 +60,7 @@ jobs:
       - slack/status:
           fail_only: true
           only_for_branches: master
-          webhook: https://hooks.slack.com/services/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
+          webhook: "${SLACK_WEBHOOK}"
 
   test-backend:
     docker:
@@ -76,7 +76,7 @@ jobs:
       - slack/status:
           fail_only: true
           only_for_branches: master
-          webhook: https://hooks.slack.com/services/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
+          webhook: "${SLACK_WEBHOOK}"
 
   scan-frontend:
     docker:
@@ -92,7 +92,7 @@ jobs:
       - slack/status:
           fail_only: true
           only_for_branches: master
-          webhook: https://hooks.slack.com/services/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
+          webhook: "${SLACK_WEBHOOK}"
 
   scan-backend:
     docker:
@@ -108,7 +108,7 @@ jobs:
       - slack/status:
           fail_only: true
           only_for_branches: master
-          webhook: https://hooks.slack.com/services/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
+          webhook: "${SLACK_WEBHOOK}"
 
 #  deploy-infrastructure:
 
