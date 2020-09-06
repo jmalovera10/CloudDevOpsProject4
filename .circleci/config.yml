@@ -21,6 +21,7 @@ jobs:
           name: Lint frontend
           command: |
             cd frontend
+            npm i
             npm run lint
       - run:
           name: Build frontend
@@ -38,6 +39,7 @@ jobs:
           name: Lint backend
           command: |
             cd backend
+            npm i
             npm run lint
       - run:
           name: Build backend
