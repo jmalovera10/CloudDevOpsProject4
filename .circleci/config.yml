@@ -88,6 +88,7 @@ jobs:
           command: |
             cd frontend
             npm i
+            npm audit fix
             npm audit --audit-level=critical --force
       - slack/status:
           fail_only: true
@@ -104,6 +105,7 @@ jobs:
           command: |
             cd backend
             npm i
+            npm audit fix
             npm audit --audit-level=critical --force
       - slack/status:
           fail_only: true
@@ -128,16 +130,18 @@ workflows:
   default:
     jobs:
       - build-frontend
-      - build-backend
-      - test-frontend:
+      - build-backend:
           requires:
             - build-frontend
-      - test-backend:
+      - test-frontend:
           requires:
             - build-backend
-      - scan-backend:
+      - test-backend:
           requires:
-            - test-backend
+            - test-frontend
       - scan-frontend:
           requires:
             - test-backend
+      - scan-backend:
+          requires:
+            - scan-frontend
