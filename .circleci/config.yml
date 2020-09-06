@@ -14,37 +14,37 @@ version: 2.1
 jobs:
   build-frontend:
     docker:
-        - image: cimg/node:12.16
-      steps:
-        - checkout
-        - run:
-            name: Lint frontend
-            command: |
-              cd frontend
-              npm run lint
-        - run:
-            name: Build frontend
-            command: |
-              cd frontend
-              npm i
-              npm run build     
+      - image: cimg/node:12.16
+    steps:
+      - checkout
+      - run:
+          name: Lint frontend
+          command: |
+            cd frontend
+            npm run lint
+      - run:
+          name: Build frontend
+          command: |
+            cd frontend
+            npm i
+            npm run build
 
   build-backend:
     docker:
-        - image: cimg/node:12.16
-      steps:
-        - checkout
-        - run:
-            name: Lint backend
-            command: |
-              cd backend
-              npm run lint
-        - run:
-            name: Build backend
-            command: |
-              cd backend
-              npm i
-              npm run build
+      - image: cimg/node:12.16
+    steps:
+      - checkout
+      - run:
+          name: Lint backend
+          command: |
+            cd backend
+            npm run lint
+      - run:
+          name: Build backend
+          command: |
+            cd backend
+            npm i
+            npm run build
 
 #  test-frontend:
 
@@ -62,7 +62,7 @@ jobs:
 
 #  deploy-frontend:
 
-#  deploy-backend:  
+#  deploy-backend:
 
 #  smoke-test:
 
