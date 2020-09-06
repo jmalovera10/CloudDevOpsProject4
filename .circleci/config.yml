@@ -18,12 +18,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Lint frontend
-          command: |
-            cd frontend
-            npm i
-            npm run lint
-      - run:
           name: Build frontend
           command: |
             cd frontend
@@ -35,12 +29,6 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - checkout
-      - run:
-          name: Lint backend
-          command: |
-            cd backend
-            npm i
-            npm run lint
       - run:
           name: Build backend
           command: |
