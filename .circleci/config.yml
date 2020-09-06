@@ -2,10 +2,22 @@ version: 2.1
 
 ### It's a good practice to keep your commands at the top of the config file. In this project, you'll need at least 2 commands:
 
-# commands:
-#   destroy-environment:
-#     description: Destroy backend and frontend cloudformation stacks given a workflow ID.
-#     ...
+commands:
+  destroy-environment:
+    description: Destroy backend and frontend cloudformation stacks given a workflow ID.
+    steps:
+      - run:
+          name: Clear backend infrastructure
+          command: |
+            aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}"
+      - run:
+          name: Clear frontend infrastructure
+          command: |
+            aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID}"
+      - run:
+          name: Clear cdn infrastructure
+          command: |
+            aws cloudformation delete-stack --stack-name "udapeople-cloudfront-${CIRCLE_WORKFLOW_ID}"
 
 #   revert-migration:
 #     description: Revert the last migration if successfully run in the current workflow.
@@ -112,7 +124,53 @@ jobs:
           only_for_branches: master
           webhook: "${SLACK_WEBHOOK}"
 
-#  deploy-infrastructure:
+  deploy-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Deploy backend infrastructure
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" \
+              --tags project=udapeople
+            aws cloudformation wait stack-create-complete --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}"
+            BACKEND_URL=$(aws cloudformation describe-stacks \
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}" \
+              --query "Stacks[0].Outputs[0].OutputValue" \
+              --output text)
+            curl -H "Content-Type: text/plain" -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
+              --request PUT 
+              --data "${BACKEND_URL}" \
+              "https://api.memstash.io/values/backendurl"
+
+      - run:
+          name: Deploy frontend infrastructure
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" \
+              --tags project=udapeople
+            aws cloudformation wait stack-create-complete --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID}"
+      - run:
+          name: Deploy cdn infrastructure
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/cloudfront.yml \
+              --stack-name "udapeople-cloudfront-${CIRCLE_WORKFLOW_ID}" \
+              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID}" \
+              --tags project=udapeople
+            aws cloudformation wait stack-create-complete --stack-name "udapeople-cloudfront-${CIRCLE_WORKFLOW_ID}"
+      - destroy-environment
+        when: on_fail
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: "${SLACK_WEBHOOK}"
 
 #  configure-infrastructure:
 
@@ -145,3 +203,6 @@ workflows:
       - scan-backend:
           requires:
             - scan-frontend
+      - deploy-infrastructure:
+          requires:
+            - scan-backend
