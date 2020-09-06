@@ -10,6 +10,8 @@ version: 2.1
 #   revert-migration:
 #     description: Revert the last migration if successfully run in the current workflow.
 #     ...
+orbs:
+  slack: circleci/slack@3.4.2
 
 jobs:
   build-frontend:
@@ -23,6 +25,10 @@ jobs:
             cd frontend
             npm i
             npm run build
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: https://hooks.slack.com/services/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
 
   build-backend:
     docker:
@@ -35,6 +41,10 @@ jobs:
             cd backend
             npm i
             npm run build
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: https://hooks.slack.com/services/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
 
   test-frontend:
     docker:
@@ -47,6 +57,10 @@ jobs:
             cd frontend
             npm i
             npm test
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: https://hooks.slack.com/services/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
 
   test-backend:
     docker:
@@ -59,6 +73,10 @@ jobs:
             cd backend
             npm i
             npm test
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: https://hooks.slack.com/services/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
 
   scan-frontend:
     docker:
@@ -70,7 +88,11 @@ jobs:
           command: |
             cd frontend
             npm i
-            npm audit --audit-level=critical
+            npm audit --audit-level=critical --force
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: https://hooks.slack.com/services/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
 
   scan-backend:
     docker:
@@ -82,7 +104,11 @@ jobs:
           command: |
             cd backend
             npm i
-            npm audit --audit-level=critical
+            npm audit --audit-level=critical --force
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: https://hooks.slack.com/services/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
 
 #  deploy-infrastructure:
 
