@@ -42,7 +42,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Build backend
+          name: Test frontend
           command: |
             cd frontend
             npm i
@@ -54,15 +54,35 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Build backend
+          name: Test backend
           command: |
             cd backend
             npm i
             npm test
 
-#  scan-frontend:
+  scan-frontend:
+    docker:
+      - image: cimg/node:12.16
+    steps:
+      - checkout
+      - run:
+          name: Scan vulnerabilities frontend
+          command: |
+            cd frontend
+            npm i
+            npm audit --audit-level=critical
 
-#  scan-backend:
+  scan-backend:
+    docker:
+        - image: cimg/node:12.16
+      steps:
+        - checkout
+        - run:
+            name: Scan vulnerabilities backend
+            command: |
+              cd backend
+              npm i
+              npm audit --audit-level=critical
 
 #  deploy-infrastructure:
 
