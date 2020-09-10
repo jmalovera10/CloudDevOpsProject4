@@ -57,9 +57,9 @@ jobs:
             npm i
             npm run build
       - persist_to_workspace:
-          root: ./frontend
+          root: .
           paths:
-            - frontend/
+            - .
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -77,11 +77,9 @@ jobs:
             npm i
             npm run build
       - persist_to_workspace:
-          root: ./backend
+          root: .
           paths:
-            - backend/
-            - .circleci/
-            - ansible/
+            - .
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -92,7 +90,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: ./
+          at: .
       - run:
           name: Test frontend
           command: |
@@ -108,7 +106,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: ./
+          at: .
       - run:
           name: Test backend
           command: |
@@ -125,7 +123,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: ./
+          at: .
       - run:
           name: Scan vulnerabilities frontend
           command: |
@@ -133,9 +131,9 @@ jobs:
             npm audit fix
             npm audit --audit-level=critical --force
       - persist_to_workspace:
-          root: ./frontend
+          root: .
           paths:
-            - frontend/
+            - .
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -146,7 +144,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: ./
+          at: .
       - run:
           name: Scan vulnerabilities backend
           command: |
@@ -154,9 +152,9 @@ jobs:
             npm audit fix
             npm audit --audit-level=critical --force
       - persist_to_workspace:
-          root: ./backend
+          root: .
           paths:
-            - backend/
+            - .
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -167,7 +165,7 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - attach_workspace:
-          at: ./
+          at: .
       - deploy-stack:
           stack_name: backend
       - run:
@@ -197,7 +195,7 @@ jobs:
       - image: "tomonorimatsumura/ubuntu18-ansible:apt"
     steps:
       - attach_workspace:
-          at: ./
+          at: .
       - run:
           name: Run ansible playbook
           command: |
@@ -219,7 +217,7 @@ jobs:
       - image: "tomonorimatsumura/ubuntu18-ansible:apt"
     steps:
       - attach_workspace:
-          at: ./
+          at: .
       - run:
           name: Run ansible playbook
           command: |
@@ -229,11 +227,9 @@ jobs:
             cd ./ansible/deploy-code
             ansible-playbook main.yml --extra-vars "variable_host=newtarget($BACKEND_URL)"
       - persist_to_workspace:
-          root: ./backend
+          root: .
           paths:
-            - backend/
-            - .circleci/
-            - ansible/
+            - .
       - slack/status:
           fail_only: true
           only_for_branches: master
