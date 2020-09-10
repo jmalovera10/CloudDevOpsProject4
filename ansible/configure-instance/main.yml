@@ -1,0 +1,17 @@
+---
+- name: "Udapeople app"
+  hosts: "{{ variable_host | default('web') }}"
+  remote_user: ubuntu
+  become: yes
+  gather_facts: false
+  pre_tasks:
+    - name: Wait 600 seconds for target connection to become reachable/usable
+      wait_for_connection:
+    - name: "Install python"
+      become: true
+      raw: test -e /usr/bin/python3 || (apt -y update && apt install -y python3)
+      changed_when: false
+    - name: Gather facts for first time
+      setup:
+  roles:
+    - configure-backend

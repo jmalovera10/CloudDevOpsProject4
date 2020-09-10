@@ -1,0 +1,11 @@
+---
+- name: "Udapeople app"
+  hosts: "{{ variable_host | default('web') }}"
+  remote_user: ubuntu
+  become: yes
+  gather_facts: false
+  pre_tasks:
+    - name: Wait 600 seconds for target connection to become reachable/usable
+      wait_for_connection:
+  roles:
+    - deploy-code

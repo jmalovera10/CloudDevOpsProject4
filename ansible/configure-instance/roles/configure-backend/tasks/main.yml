@@ -1,0 +1,31 @@
+---
+- name: install nodejs
+  become: true
+  apt:
+    name: ["nodejs"]
+    state: latest
+    update_cache: yes
+
+- name: install npm
+  become: true
+  apt:
+    name: ["npm"]
+    state: latest
+    update_cache: yes
+
+- name: install pm2
+  npm:
+    name: pm2
+    global: yes
+    state: present
+
+- name: export env variables
+  shell: |
+    ENVIRONMENT=production
+    TYPEORM_CONNECTION=postgres
+    TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts
+    TYPEORM_HOST=localhost
+    TYPEORM_PORT=5532
+    TYPEORM_USERNAME=udapeople
+    TYPEORM_PASSWORD=udapeople
+    TYPEORM_DATABASE=udapeople

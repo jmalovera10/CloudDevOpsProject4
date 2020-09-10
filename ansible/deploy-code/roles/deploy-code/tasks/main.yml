@@ -1,0 +1,11 @@
+---
+- name: copy build
+  become: true
+  copy:
+    src: server.js
+    dest: /home/ubuntu/server.js
+    backup: yes
+
+- name: run pm2
+  shell: |
+    pm2 server.js
