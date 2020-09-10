@@ -54,6 +54,8 @@ jobs:
           name: Build frontend
           command: |
             cd frontend
+            pwd
+            cwd
             npm i
             npm run build
       - persist_to_workspace:
