@@ -104,12 +104,11 @@ jobs:
           webhook: "${SLACK_WEBHOOK}"
 
   test-backend:
-    - attach_workspace:
-        at: ~/
     docker:
       - image: cimg/node:12.16
     steps:
-      - checkout
+      - attach_workspace:
+          at: ~/
       - run:
           name: Test backend
           command: |
