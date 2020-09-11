@@ -21,21 +21,25 @@ commands:
 
   destroy-environment:
     description: Destroy backend and frontend cloudformation stacks given a workflow ID.
+    parameters:
+      stack_id:
+        default: "null"
+        type: string
     steps:
       - run:
           name: Clear backend infrastructure
           command: |
-            aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}"
+            aws cloudformation delete-stack --stack-name "udapeople-backend-<<parameters.stack_id>>"
           when: on_fail
       - run:
           name: Clear frontend infrastructure
           command: |
-            aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID}"
+            aws cloudformation delete-stack --stack-name "udapeople-frontend-<<parameters.stack_id>>"
           when: on_fail
       - run:
           name: Clear cdn infrastructure
           command: |
-            aws cloudformation delete-stack --stack-name "udapeople-cloudfront-${CIRCLE_WORKFLOW_ID}"
+            aws cloudformation delete-stack --stack-name "udapeople-cloudfront-<<parameters.stack_id>>"
           when: on_fail
 
 #   revert-migration:
@@ -169,7 +173,7 @@ jobs:
       - deploy-stack:
           stack_name: backend
       - run:
-          name: Deploy backend infrastructure
+          name: Register backend infrastructure
           command: |
             BACKEND_URL=$(aws cloudformation describe-stacks \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}" \
@@ -182,9 +186,8 @@ jobs:
       # curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" --request GET https://api.memstash.io/values/backendurl
       - deploy-stack:
           stack_name: frontend
-      - deploy-stack:
-          stack_name: cloudfront
-      - destroy-environment
+      - destroy-environment:
+          stack_id: ${CIRCLE_WORKFLOW_ID}
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -203,6 +206,8 @@ jobs:
               --request GET https://api.memstash.io/values/backendurl)
             cd ./ansible/configure-instance
             ansible-playbook main.yml --extra-vars "variable_host=newtarget($BACKEND_URL)"
+      - destroy-environment:
+          stack_id: ${CIRCLE_WORKFLOW_ID}
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -210,7 +215,27 @@ jobs:
 
   #  run-migrations:
 
-  #  deploy-frontend:
+  deploy-frontend:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Deploy code to s3
+          command: |
+            API_URL=$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
+              --request GET https://api.memstash.io/values/backendurl)
+            cd ./frontend
+            npm run build
+            aws s3 sync ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID}"
+
+      - destroy-environment:
+          stack_id: ${CIRCLE_WORKFLOW_ID}
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: "${SLACK_WEBHOOK}"
 
   deploy-backend:
     docker:
@@ -230,14 +255,72 @@ jobs:
           root: .
           paths:
             - .
+      - destroy-environment:
+          stack_id: ${CIRCLE_WORKFLOW_ID}
       - slack/status:
           fail_only: true
           only_for_branches: master
           webhook: "${SLACK_WEBHOOK}"
 
-#  smoke-test:
+  smoke-test:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - run:
+          name: Smoke test backend
+          command: |
+            BACKEND_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --output text)
+            curl "http://${BACKEND_IP}:3030/api/status"
 
-#  cloudfront-update:
+      - run:
+          name: Smoke test frontend
+          command: |
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-east-1.amazonaws.com/#/employees"            
+            if curl -s ${URL} | grep "Welcome"
+            then
+            return 1
+            else
+            return 0
+            fi
+
+      - destroy-environment:
+          stack_id: ${CIRCLE_WORKFLOW_ID}
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: "${SLACK_WEBHOOK}"
+
+  cloudfront-update:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - run:
+          name: Update cloudfront with new bucket
+          command: |
+            aws cloudformation update \
+              --template-file ".circleci/files/cloudfront.yml" \
+              --stack-name "udapeople-cdn" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" \
+              --tags project=udapeople
+
+      - destroy-environment:
+          stack_id: ${CIRCLE_WORKFLOW_ID}
+      - destroy-environment:
+          stack_id: $(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" --request GET https://api.memstash.io/values/previousworkflow)
+      - run:
+          name: Register old environment
+          command: |
+            curl -H "Content-Type: text/plain" -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
+              --request PUT 
+              --data "${CIRCLE_WORKFLOW_ID}" \
+              "https://api.memstash.io/values/previousworkflow"
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: "${SLACK_WEBHOOK}"
 
 workflows:
   default:
