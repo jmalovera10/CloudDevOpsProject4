@@ -317,7 +317,7 @@ jobs:
       - destroy-environment:
           stack_id: ${CIRCLE_WORKFLOW_ID}
       - destroy-environment:
-          stack_id: $(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" --request GET https://api.memstash.io/values/previousworkflow)
+          stack_id: "$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" --request GET https://api.memstash.io/values/previousworkflow)"
       - run:
           name: Register old environment
           command: |
