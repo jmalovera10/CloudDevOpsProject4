@@ -1,6 +1,6 @@
 ---
 - name: "Udapeople app"
-  hosts: "{{ variable_host | default('web') }}"
+  hosts: "web"
   remote_user: ubuntu
   become: yes
   gather_facts: false
