@@ -61,7 +61,7 @@ jobs:
             npm i
             npm run build
       - persist_to_workspace:
-          root: .
+          root: /frontend-build
           paths:
             - .
       - slack/status:
@@ -81,7 +81,7 @@ jobs:
             npm i
             npm run build
       - persist_to_workspace:
-          root: .
+          root: /backend-build
           paths:
             - .
       - slack/status:
@@ -94,7 +94,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: .
+          at: /frontend-build
       - run:
           name: Test frontend
           command: |
@@ -110,7 +110,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: .
+          at: /backend-build
       - run:
           name: Test backend
           command: |
@@ -127,7 +127,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: .
+          at: /frontend-build
       - run:
           name: Scan vulnerabilities frontend
           command: |
@@ -137,7 +137,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - .
+            - /frontend-build
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -148,7 +148,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: .
+          at: /backend-build
       - run:
           name: Scan vulnerabilities backend
           command: |
@@ -156,7 +156,7 @@ jobs:
             npm audit fix
             npm audit --audit-level=critical --force
       - persist_to_workspace:
-          root: .
+          root: /backend-build
           paths:
             - .
       - slack/status:
@@ -168,8 +168,11 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
+      - run:
+          name: Install tar utility
+          command: yum install -y tar
       - attach_workspace:
-          at: .
+          at: /backend-build
       - deploy-stack:
           stack_name: backend
       - run:
@@ -198,7 +201,7 @@ jobs:
       - image: "tomonorimatsumura/ubuntu18-ansible:apt"
     steps:
       - attach_workspace:
-          at: .
+          at: /backend-build
       - add_ssh_keys:
           fingerprints:
             - "91:d6:ae:8b:2b:8a:8a:1a:8c:b6:01:fd:81:70:a8:7d"
@@ -222,6 +225,8 @@ jobs:
     docker:
       - image: cimg/node:12.16
     steps:
+      - attach_workspace:
+          at: /backend-build
       - run:
           name: Run migrations
           command: |
@@ -232,15 +237,17 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
+      - run:
+          name: Install tar utility
+          command: yum install -y tar
       - attach_workspace:
-          at: .
+          at: /frontend-build
       - run:
           name: Deploy code to s3
           command: |
             API_URL=$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
               --request GET https://api.memstash.io/values/backendurl)
             cd ./frontend
-            npm run build
             aws s3 sync ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID}"
 
       - destroy-environment:
@@ -255,7 +262,7 @@ jobs:
       - image: "tomonorimatsumura/ubuntu18-ansible:apt"
     steps:
       - attach_workspace:
-          at: .
+          at: /backend-build
       - add_ssh_keys:
           fingerprints:
             - "91:d6:ae:8b:2b:8a:8a:1a:8c:b6:01:fd:81:70:a8:7d"
@@ -345,24 +352,25 @@ workflows:
   default:
     jobs:
       - build-frontend
-      - build-backend:
-          requires:
-            - build-frontend
+      - build-backend
       - test-frontend:
           requires:
-            - build-backend
+            - build-frontend
       - test-backend:
           requires:
-            - test-frontend
+            - build-backend
       - scan-frontend:
           requires:
-            - test-backend
+            - build-frontend
       - scan-backend:
           requires:
-            - scan-frontend
+            - build-backend
       - deploy-infrastructure:
           requires:
+            - test-frontend
+            - test-backend
             - scan-backend
+            - scan-frontend
           filters:
             branches:
               only:
