@@ -61,9 +61,9 @@ jobs:
             npm i
             npm run build
       - persist_to_workspace:
-          root: /frontend-build
+          root: .
           paths:
-            - .
+            - frontend
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -81,9 +81,10 @@ jobs:
             npm i
             npm run build
       - persist_to_workspace:
-          root: /backend-build
+          root: .
           paths:
-            - .
+            - backend
+            - .circleci
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -94,7 +95,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: /frontend-build
+          at: .
       - run:
           name: Test frontend
           command: |
@@ -110,7 +111,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: /backend-build
+          at: .
       - run:
           name: Test backend
           command: |
@@ -127,7 +128,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: /frontend-build
+          at: .
       - run:
           name: Scan vulnerabilities frontend
           command: |
@@ -137,7 +138,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - /frontend-build
+            - frontend
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -148,7 +149,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: /backend-build
+          at: .
       - run:
           name: Scan vulnerabilities backend
           command: |
@@ -156,9 +157,9 @@ jobs:
             npm audit fix
             npm audit --audit-level=critical --force
       - persist_to_workspace:
-          root: /backend-build
+          root: .
           paths:
-            - .
+            - backend
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -168,11 +169,7 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
-      - run:
-          name: Install tar utility
-          command: yum install -y tar
-      - attach_workspace:
-          at: /backend-build
+      - checkout
       - deploy-stack:
           stack_name: backend
       - run:
@@ -200,8 +197,7 @@ jobs:
     docker:
       - image: "tomonorimatsumura/ubuntu18-ansible:apt"
     steps:
-      - attach_workspace:
-          at: /backend-build
+      - checkout
       - add_ssh_keys:
           fingerprints:
             - "91:d6:ae:8b:2b:8a:8a:1a:8c:b6:01:fd:81:70:a8:7d"
@@ -226,7 +222,7 @@ jobs:
       - image: cimg/node:12.16
     steps:
       - attach_workspace:
-          at: /backend-build
+          at: .
       - run:
           name: Run migrations
           command: |
@@ -241,7 +237,7 @@ jobs:
           name: Install tar utility
           command: yum install -y tar
       - attach_workspace:
-          at: /frontend-build
+          at: .
       - run:
           name: Deploy code to s3
           command: |
@@ -262,7 +258,7 @@ jobs:
       - image: "tomonorimatsumura/ubuntu18-ansible:apt"
     steps:
       - attach_workspace:
-          at: /backend-build
+          at: .
       - add_ssh_keys:
           fingerprints:
             - "91:d6:ae:8b:2b:8a:8a:1a:8c:b6:01:fd:81:70:a8:7d"
@@ -276,10 +272,6 @@ jobs:
             echo [web] > inventory.txt
             echo $BACKEND_URL >> inventory.txt
             ansible-playbook main.yml --private-key ~/.ssh/id_rsa"
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
       - destroy-environment:
           stack_id: ${CIRCLE_WORKFLOW_ID}
       - slack/status:
