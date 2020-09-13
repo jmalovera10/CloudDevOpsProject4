@@ -213,7 +213,15 @@ jobs:
           only_for_branches: master
           webhook: "${SLACK_WEBHOOK}"
 
-  #  run-migrations:
+  run-migrations:
+    docker:
+      - image: cimg/node:12.16
+    steps:
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm run migrations
 
   deploy-frontend:
     docker:
@@ -323,6 +331,7 @@ jobs:
           webhook: "${SLACK_WEBHOOK}"
 
 workflows:
+  version: 2
   default:
     jobs:
       - build-frontend
@@ -341,6 +350,16 @@ workflows:
       - scan-backend:
           requires:
             - scan-frontend
-      # - deploy-infrastructure:
-      #     requires:
-      #       - scan-backend
+      - deploy-infrastructure:
+          requires:
+            - scan-backend
+          filters:
+            branches:
+              only:
+                - master
+      - configure-infrastructure:
+          requires:
+            - deploy-infrastructure
+      - run-migrations:
+          requires:
+            - configure-infrastructure
