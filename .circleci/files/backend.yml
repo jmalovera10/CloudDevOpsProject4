@@ -41,4 +41,5 @@ Outputs:
     Description: The ec2 backend instance endpoint
     Value: !GetAtt EC2Instance.PublicDnsName
     Export:
-      Name: !Sub "ec2-endpoint-${ID}"
+      Name:
+        Fn::Join: ["-", [{ "Ref": "ID" }, "ec2"]]
