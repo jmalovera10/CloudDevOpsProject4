@@ -177,6 +177,7 @@ jobs:
           command: |
             BACKEND_URL=$(aws cloudformation describe-stacks \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}" \
+              --region us-east-1 \
               --query "Stacks[0].Outputs[0].OutputValue" \
               --output text)
             curl -H "Content-Type: text/plain" -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
