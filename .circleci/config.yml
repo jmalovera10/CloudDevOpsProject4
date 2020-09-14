@@ -176,7 +176,7 @@ jobs:
           name: Register backend infrastructure
           command: |
             BACKEND_URL=$(aws ec2 describe-instances \
-              --filters 'Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}'
+              --filters 'Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID}' \
               --query "Reservations[*].Instances[*].PublicIpAddress" \
               --output=text)
             curl -H "Content-Type: text/plain" -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
