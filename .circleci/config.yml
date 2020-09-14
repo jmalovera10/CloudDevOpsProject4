@@ -17,7 +17,7 @@ commands:
               --stack-name "udapeople-<<parameters.stack_name>>-${CIRCLE_WORKFLOW_ID}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" \
               --tags project=udapeople
-            # aws cloudformation wait stack-create-complete --stack-name "udapeople-<<parameters.stack_name>>-${CIRCLE_WORKFLOW_ID}"
+            aws cloudformation wait stack-create-complete --stack-name "udapeople-<<parameters.stack_name>>-${CIRCLE_WORKFLOW_ID}"
 
   destroy-environment:
     description: Destroy backend and frontend cloudformation stacks given a workflow ID.
