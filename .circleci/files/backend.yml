@@ -13,7 +13,7 @@ Resources:
       GroupName: !Sub "UdaPeople-${ID}"
       GroupDescription: Allow port 22 and port 3030.
       VpcId:
-        Fn::ImportValue: !Ref UdacityCapstone-VPCID
+        Fn::ImportValue: UdacityCapstone-VPCID
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
