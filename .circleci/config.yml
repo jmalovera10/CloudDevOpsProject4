@@ -173,6 +173,9 @@ jobs:
       - deploy-stack:
           stack_name: backend
       - run:
+          name: Echo credentials
+          command: cat ~/.aws/credentials
+      - run:
           name: Register backend infrastructure
           command: |
             BACKEND_URL=$(aws cloudformation describe-stacks \
