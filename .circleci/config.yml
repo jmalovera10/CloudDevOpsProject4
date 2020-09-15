@@ -180,7 +180,7 @@ jobs:
               --query "Reservations[*].Instances[*].PublicIpAddress" \
               --output=text)
             curl -H "Content-Type: text/plain" -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
-              --request PUT 
+              --request PUT \
               --data "${BACKEND_URL}" \
               "https://api.memstash.io/values/backendurl"
       # curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" --request GET https://api.memstash.io/values/backendurl
@@ -331,7 +331,7 @@ jobs:
           name: Register old environment
           command: |
             curl -H "Content-Type: text/plain" -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
-              --request PUT 
+              --request PUT \
               --data "${CIRCLE_WORKFLOW_ID}" \
               "https://api.memstash.io/values/previousworkflow"
       - slack/status:
