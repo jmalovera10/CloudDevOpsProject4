@@ -195,8 +195,11 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: "tomonorimatsumura/ubuntu18-ansible:apt"
+      - image: "ansible/ansible:ubuntu1604"
     steps:
+      - run:
+          name: Install System Packages
+          command: pip install --upgrade pip && pip install ansible
       - checkout
       - add_ssh_keys:
           fingerprints:
