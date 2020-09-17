@@ -222,7 +222,7 @@ jobs:
             cd ./.circleci/ansible/configure-server
             echo [web] > inventory.txt
             echo $BACKEND_URL >> inventory.txt
-            # ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
+            ## ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
       - ansible-playbook:
           inventory: "./.circleci/ansible/configure-server/inventory.txt"
           playbook: "./.circleci/ansible/configure-server/main.yml"
