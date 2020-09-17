@@ -24,7 +24,7 @@
     ENVIRONMENT=production
     TYPEORM_CONNECTION=postgres
     TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts
-    TYPEORM_HOST=localhost
+    TYPEORM_HOST=udapeople.c0dflfjnllnb.us-east-1.rds.amazonaws.com
     TYPEORM_PORT=5532
     TYPEORM_USERNAME=udapeople
     TYPEORM_PASSWORD=udapeople

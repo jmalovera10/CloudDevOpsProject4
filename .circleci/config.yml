@@ -209,7 +209,7 @@ jobs:
             cd ./.circleci/ansible/configure-server
             echo [web] > inventory.txt
             echo $BACKEND_URL >> inventory.txt
-            ansible-playbook main.yml --private-key ~/.ssh/id_rsa"
+            ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
       - destroy-environment:
           stack_id: ${CIRCLE_WORKFLOW_ID}
       - slack/status:
@@ -271,7 +271,7 @@ jobs:
             cd ./.circleci/ansible/deploy
             echo [web] > inventory.txt
             echo $BACKEND_URL >> inventory.txt
-            ansible-playbook main.yml --private-key ~/.ssh/id_rsa"
+            ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
       - destroy-environment:
           stack_id: ${CIRCLE_WORKFLOW_ID}
       - slack/status:
