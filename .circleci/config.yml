@@ -58,6 +58,7 @@ commands:
 #     ...
 orbs:
   slack: circleci/slack@3.4.2
+  ansible-playbook: orbss/ansible-playbook@0.0.5
 
 jobs:
   build-frontend:
@@ -221,7 +222,11 @@ jobs:
             cd ./.circleci/ansible/configure-server
             echo [web] > inventory.txt
             echo $BACKEND_URL >> inventory.txt
-            ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
+            # ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
+      - ansible-playbook:
+          inventory: "./.circleci/ansible/configure-server/inventory.txt"
+          playbook: "./.circleci/ansible/configure-server/main.yml"
+          private-key: "~/.ssh/id_rsa"
       - destroy-environment:
           stack_id: ${CIRCLE_WORKFLOW_ID}
       - slack/status:
@@ -280,11 +285,15 @@ jobs:
           command: |
             BACKEND_URL=$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
               --request GET https://api.memstash.io/values/backendurl)
-            cp ./backend/dist/server.js ./ansible/deploy-code/roles/deploy-code/files/server.js
+            cp ./backend/dist/server.js ./ansible/deploy/roles/deploy-code/files/server.js
             cd ./.circleci/ansible/deploy
             echo [web] > inventory.txt
             echo $BACKEND_URL >> inventory.txt
-            ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
+            # ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
+      - ansible-playbook:
+          inventory: "./.circleci/ansible/deploy/inventory.txt"
+          playbook: "./.circleci/ansible/deploy/main.yml"
+          private-key: "~/.ssh/id_rsa"
       - destroy-environment:
           stack_id: ${CIRCLE_WORKFLOW_ID}
       - slack/status:
