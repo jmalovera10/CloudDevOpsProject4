@@ -42,6 +42,17 @@ commands:
             aws cloudformation delete-stack --stack-name "udapeople-cloudfront-<<parameters.stack_id>>"
           when: on_fail
 
+  install-ansible:
+    description: Command that install ansible in an ubuntu machine
+    steps:
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo apt-add-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
+
 #   revert-migration:
 #     description: Revert the last migration if successfully run in the current workflow.
 #     ...
@@ -201,6 +212,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "91:d6:ae:8b:2b:8a:8a:1a:8c:b6:01:fd:81:70:a8:7d"
+      - install-ansible
       - run:
           name: Run ansible playbook
           command: |
@@ -262,6 +274,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "91:d6:ae:8b:2b:8a:8a:1a:8c:b6:01:fd:81:70:a8:7d"
+      - install-ansible
       - run:
           name: Run ansible playbook
           command: |
