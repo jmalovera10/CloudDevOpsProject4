@@ -48,17 +48,18 @@ commands:
       - run:
           name: Install Ansible
           command: |
-            sudo apt update
-            sudo apt install software-properties-common -y
-            sudo apt-add-repository --yes --update ppa:ansible/ansible
-            sudo apt install ansible -y
+            #sudo apt update
+            #sudo apt install software-properties-common -y
+            #sudo apt-add-repository --yes --update ppa:ansible/ansible
+            #sudo apt install ansible -y
+            sudo python get-pip.py
+            sudo pip install ansible
 
 #   revert-migration:
 #     description: Revert the last migration if successfully run in the current workflow.
 #     ...
 orbs:
   slack: circleci/slack@3.4.2
-  ansible-playbook: orbss/ansible-playbook@0.0.5
 
 jobs:
   build-frontend:
@@ -207,7 +208,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: "ansible/ansible:ubuntu1604"
+      - image: "circleci/python:3.6.4"
     steps:
       - checkout
       - add_ssh_keys:
@@ -222,11 +223,7 @@ jobs:
             cd ./.circleci/ansible/configure-server
             echo [web] > inventory.txt
             echo $BACKEND_URL >> inventory.txt
-            ## ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
-      - ansible-playbook:
-          inventory: "./.circleci/ansible/configure-server/inventory.txt"
-          playbook: "./.circleci/ansible/configure-server/main.yml"
-          private-key: "~/.ssh/id_rsa"
+            ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
       - destroy-environment:
           stack_id: ${CIRCLE_WORKFLOW_ID}
       - slack/status:
@@ -272,7 +269,7 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: "tomonorimatsumura/ubuntu18-ansible:apt"
+      - image: "circleci/python:3.6.4"
     steps:
       - attach_workspace:
           at: .
@@ -289,11 +286,7 @@ jobs:
             cd ./.circleci/ansible/deploy
             echo [web] > inventory.txt
             echo $BACKEND_URL >> inventory.txt
-            # ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
-      - ansible-playbook:
-          inventory: "./.circleci/ansible/deploy/inventory.txt"
-          playbook: "./.circleci/ansible/deploy/main.yml"
-          private-key: "~/.ssh/id_rsa"
+            ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
       - destroy-environment:
           stack_id: ${CIRCLE_WORKFLOW_ID}
       - slack/status:
