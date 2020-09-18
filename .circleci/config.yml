@@ -251,7 +251,9 @@ jobs:
     steps:
       - run:
           name: Install tar utility
-          command: yum install -y tar
+          command: |
+            yum install -y tar
+            yum install -y gzip
       - attach_workspace:
           at: .
       - run:
@@ -284,6 +286,7 @@ jobs:
           command: |
             BACKEND_URL=$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
               --request GET https://api.memstash.io/values/backendurl)
+            ls ./backend
             cp ./backend/dist/server.js ./ansible/deploy/roles/deploy-code/files/server.js
             cd ./.circleci/ansible/deploy
             echo [web] > inventory.txt
