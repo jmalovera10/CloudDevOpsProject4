@@ -8,4 +8,4 @@
 
 - name: run pm2
   shell: |
-    pm2 server.js
+    pm2 start server.js
