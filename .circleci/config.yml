@@ -319,6 +319,8 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
+      - attach_workspace:
+          at: .
       - run:
           name: Smoke test backend
           command: |
@@ -337,10 +339,10 @@ jobs:
             then
             return 1
             else
-            return 0
+            return 1
             fi
 
-      - destroy-environment
+      # - destroy-environment
       - revert-migration
       - slack/status:
           fail_only: true
@@ -351,6 +353,8 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
+      - attach_workspace:
+          at: .
       - run:
           name: Update cloudfront with new bucket
           command: |
