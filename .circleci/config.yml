@@ -21,6 +21,21 @@ commands:
 
   destroy-environment:
     description: Destroy backend and frontend cloudformation stacks given a workflow ID.
+    steps:
+      - run:
+          name: Clear backend infrastructure
+          command: |
+            aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID}"
+          when: on_fail
+      - run:
+          name: Clear frontend infrastructure
+          command: |
+            aws s3 rm "s3://udapeople-<<parameters.stack_id>>" --recursive
+            aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID}"
+          when: on_fail
+
+  clean-environment:
+    description: Clean backend and frontend cloudformation stacks given a workflow ID.
     parameters:
       stack_id:
         default: "null"
@@ -30,18 +45,11 @@ commands:
           name: Clear backend infrastructure
           command: |
             aws cloudformation delete-stack --stack-name "udapeople-backend-<<parameters.stack_id>>"
-          when: on_fail
       - run:
           name: Clear frontend infrastructure
           command: |
             aws s3 rm "s3://udapeople-<<parameters.stack_id>>" --recursive
             aws cloudformation delete-stack --stack-name "udapeople-frontend-<<parameters.stack_id>>"
-          when: on_fail
-      - run:
-          name: Clear cdn infrastructure
-          command: |
-            aws cloudformation delete-stack --stack-name "udapeople-cloudfront-<<parameters.stack_id>>"
-          when: on_fail
 
   install-ansible:
     description: Command that install ansible in an ubuntu machine
@@ -56,9 +64,16 @@ commands:
             #sudo python get-pip.py
             sudo pip install ansible
 
-#   revert-migration:
-#     description: Revert the last migration if successfully run in the current workflow.
-#     ...
+  revert-migration:
+    description: Revert the last migration if successfully run in the current workflow.
+    steps:
+      - run:
+          name: Revert migrations
+          command: |
+            cd backend
+            npm run migrations:revert}
+          when: on_fail
+
 orbs:
   slack: circleci/slack@3.4.2
 
@@ -201,8 +216,7 @@ jobs:
       # curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" --request GET https://api.memstash.io/values/backendurl
       - deploy-stack:
           stack_name: frontend
-      - destroy-environment:
-          stack_id: ${CIRCLE_WORKFLOW_ID}
+      - destroy-environment
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -227,8 +241,7 @@ jobs:
             echo $BACKEND_URL >> inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
-      - destroy-environment:
-          stack_id: ${CIRCLE_WORKFLOW_ID}
+      - destroy-environment
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -251,10 +264,12 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - run:
-          name: Install tar utility
+          name: Install missing packages
           command: |
             yum install -y tar
             yum install -y gzip
+            curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
+            yum install nodejs
       - attach_workspace:
           at: .
       - run:
@@ -266,8 +281,7 @@ jobs:
             npm run build
             aws s3 sync ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID}"
 
-      - destroy-environment:
-          stack_id: ${CIRCLE_WORKFLOW_ID}
+      - destroy-environment
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -295,8 +309,7 @@ jobs:
             echo $BACKEND_URL >> inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook main.yml --private-key "~/.ssh/id_rsa" -i inventory.txt
-      - destroy-environment:
-          stack_id: ${CIRCLE_WORKFLOW_ID}
+      - destroy-environment
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -327,8 +340,8 @@ jobs:
             return 0
             fi
 
-      - destroy-environment:
-          stack_id: ${CIRCLE_WORKFLOW_ID}
+      - destroy-environment
+      - revert-migration
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -347,10 +360,8 @@ jobs:
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" \
               --tags project=udapeople
 
-      - destroy-environment:
-          stack_id: ${CIRCLE_WORKFLOW_ID}
-      - destroy-environment:
-          stack_id: '$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" --request GET https://api.memstash.io/values/previousworkflow)'
+      - clean-environment:
+          stack_id: "$(curl -H 'token: 095cef7a-185c-43c6-aa1c-a479edebe4e7' --request GET https://api.memstash.io/values/previousworkflow)"
       - run:
           name: Register old environment
           command: |
@@ -358,6 +369,8 @@ jobs:
               --request PUT \
               --data "${CIRCLE_WORKFLOW_ID}" \
               "https://api.memstash.io/values/previousworkflow"
+      - destroy-environment
+      - revert-migration
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -402,7 +415,7 @@ workflows:
             - run-migrations
       - deploy-backend:
           requires:
-            - run-migrations
+            - deploy-frontend
       - smoke-test:
           requires:
             - deploy-frontend
