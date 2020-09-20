@@ -361,8 +361,8 @@ jobs:
             exit 1
             fi
 
-      # - destroy-environment
-      # - revert-migration
+      - destroy-environment
+      - revert-migration
       - slack/status:
           fail_only: true
           only_for_branches: master
