@@ -6,8 +6,16 @@
     dest: /home/ubuntu
     backup: yes
 
+- name: copy package
+  become: true
+  copy:
+    src: package.json
+    dest: /home/ubuntu/package.json
+    backup: yes
+
 - name: run pm2
   shell: |
+    npm i
     ENVIRONMENT=production \
     TYPEORM_CONNECTION=postgres \
     TYPEORM_ENTITIES="./dist/modules/domain/**/*.entity{.ts,.js}" \

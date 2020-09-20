@@ -304,6 +304,7 @@ jobs:
               --request GET https://api.memstash.io/values/backendurl)
             ls ./backend/dist
             cp -R ./backend/dist ./.circleci/ansible/deploy/roles/deploy-code/files/dist
+            cp ./backend/package.json ./.circleci/ansible/deploy/roles/deploy-code/files/package.json
             cd ./.circleci/ansible/deploy
             echo [web] > inventory.txt
             echo $BACKEND_URL >> inventory.txt
@@ -343,7 +344,7 @@ jobs:
             fi
 
       # - destroy-environment
-      - revert-migration
+      # - revert-migration
       - slack/status:
           fail_only: true
           only_for_branches: master
