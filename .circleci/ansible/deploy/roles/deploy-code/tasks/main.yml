@@ -3,7 +3,7 @@
   become: true
   copy:
     src: dist
-    dest: /home/ubuntu/dist
+    dest: /home/ubuntu
     backup: yes
 
 - name: run pm2
