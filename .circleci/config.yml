@@ -194,7 +194,19 @@ jobs:
           only_for_branches: master
           webhook: "${SLACK_WEBHOOK}"
 
-  deploy-infrastructure:
+  deploy-infrastructure-frontend:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - deploy-stack:
+          stack_name: frontend
+      - destroy-environment
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
+          webhook: "${SLACK_WEBHOOK}"
+
+  deploy-infrastructure-backend:
     docker:
       - image: amazon/aws-cli
     steps:
@@ -214,8 +226,6 @@ jobs:
               --data "${BACKEND_URL}" \
               "https://api.memstash.io/values/backendurl"
       # curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" --request GET https://api.memstash.io/values/backendurl
-      - deploy-stack:
-          stack_name: frontend
       - destroy-environment
       - slack/status:
           fail_only: true
@@ -413,7 +423,17 @@ workflows:
       - scan-backend:
           requires:
             - build-backend
-      - deploy-infrastructure:
+      - deploy-infrastructure-frontend:
+          requires:
+            - test-frontend
+            - test-backend
+            - scan-backend
+            - scan-frontend
+          filters:
+            branches:
+              only:
+                - master
+      - deploy-infrastructure-backend:
           requires:
             - test-frontend
             - test-backend
@@ -425,13 +445,14 @@ workflows:
                 - master
       - configure-infrastructure:
           requires:
-            - deploy-infrastructure
+            - deploy-infrastructure-backend
       - run-migrations:
           requires:
             - configure-infrastructure
       - deploy-frontend:
           requires:
-            - run-migrations
+            - deploy-infrastructure-frontend
+            - deploy-infrastructure-backend
       - deploy-backend:
           requires:
             - run-migrations

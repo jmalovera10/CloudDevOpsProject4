@@ -13,9 +13,12 @@
     dest: /home/ubuntu/package.json
     backup: yes
 
-- name: run pm2
+- name: install node_modules
   shell: |
     npm i
+
+- name: run pm2
+  shell: |
     ENVIRONMENT=production \
     TYPEORM_CONNECTION=postgres \
     TYPEORM_ENTITIES="./dist/modules/domain/**/*.entity{.ts,.js}" \
