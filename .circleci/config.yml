@@ -30,7 +30,7 @@ commands:
       - run:
           name: Clear frontend infrastructure
           command: |
-            aws s3 rm "s3://udapeople-<<parameters.stack_id>>" --recursive
+            aws s3 rm "s3://udapeople-${CIRCLE_WORKFLOW_ID}" --recursive
             aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID}"
           when: on_fail
 
@@ -418,7 +418,6 @@ workflows:
             - deploy-frontend
       - smoke-test:
           requires:
-            - deploy-frontend
             - deploy-backend
       - cloudfront-update:
           requires:
