@@ -268,7 +268,7 @@ jobs:
           command: |
             yum install -y tar
             yum install -y gzip
-            curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
+            curl -sL https://rpm.nodesource.com/setup_10.x | bash -
             yum install nodejs
       - attach_workspace:
           at: .
