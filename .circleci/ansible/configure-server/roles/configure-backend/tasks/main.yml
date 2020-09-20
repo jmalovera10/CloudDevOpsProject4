@@ -18,14 +18,3 @@
     name: pm2
     global: yes
     state: present
-
-- name: export env variables
-  shell: |
-    ENVIRONMENT=production
-    TYPEORM_CONNECTION=postgres
-    TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts
-    TYPEORM_HOST=udapeople1.c0dflfjnllnb.us-east-1.rds.amazonaws.com
-    TYPEORM_PORT=5432
-    TYPEORM_USERNAME=udapeople
-    TYPEORM_PASSWORD=udapeople
-    TYPEORM_DATABASE=udapeople

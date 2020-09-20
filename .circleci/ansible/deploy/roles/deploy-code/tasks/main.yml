@@ -2,10 +2,18 @@
 - name: copy build
   become: true
   copy:
-    src: server.js
-    dest: /home/ubuntu/server.js
+    src: dist
+    dest: /home/ubuntu/dist
     backup: yes
 
 - name: run pm2
   shell: |
-    pm2 start server.js
+    ENVIRONMENT=production \
+    TYPEORM_CONNECTION=postgres \
+    TYPEORM_ENTITIES="./dist/modules/domain/**/*.entity{.ts,.js}" \
+    TYPEORM_HOST=udapeople1.c0dflfjnllnb.us-east-1.rds.amazonaws.com \
+    TYPEORM_PORT=5432 \
+    TYPEORM_USERNAME=udapeople \
+    TYPEORM_PASSWORD=udapeople \
+    TYPEORM_DATABASE=udapeople \
+    pm2 start ./dist/main.js

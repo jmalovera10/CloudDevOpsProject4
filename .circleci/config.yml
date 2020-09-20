@@ -34,6 +34,7 @@ commands:
       - run:
           name: Clear frontend infrastructure
           command: |
+            aws s3 rm "s3://udapeople-<<parameters.stack_id>>" --recursive
             aws cloudformation delete-stack --stack-name "udapeople-frontend-<<parameters.stack_id>>"
           when: on_fail
       - run:
@@ -262,6 +263,7 @@ jobs:
             API_URL=$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
               --request GET https://api.memstash.io/values/backendurl)
             cd ./frontend
+            npm run build
             aws s3 sync ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID}"
 
       - destroy-environment:
@@ -287,7 +289,7 @@ jobs:
             BACKEND_URL=$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
               --request GET https://api.memstash.io/values/backendurl)
             ls ./backend/dist
-            cp ./backend/dist/main.js ./.circleci/ansible/deploy/roles/deploy-code/files/server.js
+            cp -R ./backend/dist ./.circleci/ansible/deploy/roles/deploy-code/files/dist
             cd ./.circleci/ansible/deploy
             echo [web] > inventory.txt
             echo $BACKEND_URL >> inventory.txt
