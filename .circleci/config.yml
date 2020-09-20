@@ -320,6 +320,11 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
+      - run:
+          name: Install missing packages
+          command: |
+            yum install -y tar
+            yum install -y gzip
       - attach_workspace:
           at: .
       - run:
@@ -343,8 +348,8 @@ jobs:
             return 1
             fi
 
-      # - destroy-environment
-      # - revert-migration
+      - destroy-environment
+      - revert-migration
       - slack/status:
           fail_only: true
           only_for_branches: master
@@ -420,10 +425,11 @@ workflows:
             - run-migrations
       - deploy-backend:
           requires:
-            - deploy-frontend
+            - run-migrations
       - smoke-test:
           requires:
             - deploy-backend
+            - deploy-frontend
       - cloudfront-update:
           requires:
             - smoke-test
