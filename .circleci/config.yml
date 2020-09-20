@@ -71,7 +71,7 @@ commands:
           name: Revert migrations
           command: |
             cd backend
-            npm run migrations:revert}
+            npm run migrations:revert
           when: on_fail
 
 orbs:
