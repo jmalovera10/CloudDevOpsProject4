@@ -382,10 +382,9 @@ jobs:
           name: Update cloudfront with new bucket
           command: |
             aws cloudformation update-stack \
-              --template-file ".circleci/files/cloudfront.yml" \
+              --template-body "file://.circleci/files/cloudfront.yml" \
               --stack-name "udapeople-cdn" \
-              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID}" \
-              --tags project=udapeople
+              --parameters "ParameterKey=WorkflowID,ParameterValue=${CIRCLE_WORKFLOW_ID}" \
 
       - clean-environment
       - run:
