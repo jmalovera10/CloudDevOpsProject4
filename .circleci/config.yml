@@ -36,20 +36,17 @@ commands:
 
   clean-environment:
     description: Clean backend and frontend cloudformation stacks given a workflow ID.
-    parameters:
-      stack_id:
-        default: "null"
-        type: string
     steps:
       - run:
           name: Clear backend infrastructure
           command: |
-            aws cloudformation delete-stack --stack-name "udapeople-backend-<<parameters.stack_id>>"
+            STACK_ID=$(curl -H 'token: 095cef7a-185c-43c6-aa1c-a479edebe4e7' --request GET https://api.memstash.io/values/previousworkflow)
+            aws cloudformation delete-stack --stack-name "udapeople-backend-${STACK_ID}"
       - run:
           name: Clear frontend infrastructure
           command: |
-            aws s3 rm "s3://udapeople-<<parameters.stack_id>>" --recursive
-            aws cloudformation delete-stack --stack-name "udapeople-frontend-<<parameters.stack_id>>"
+            aws s3 rm "s3://udapeople-${STACK_ID}" --recursive
+            aws cloudformation delete-stack --stack-name "udapeople-frontend-${STACK_ID}"
 
   install-ansible:
     description: Command that install ansible in an ubuntu machine
@@ -390,8 +387,7 @@ jobs:
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID}" \
               --tags project=udapeople
 
-      - clean-environment:
-          stack_id: "$(curl -H 'token: 095cef7a-185c-43c6-aa1c-a479edebe4e7' --request GET https://api.memstash.io/values/previousworkflow)"
+      - clean-environment
       - run:
           name: Register old environment
           command: |
