@@ -15,6 +15,7 @@
 
 - name: install node_modules
   shell: |
+    npm config set registry http://registry.npmjs.org/
     npm i
 
 - name: run pm2
