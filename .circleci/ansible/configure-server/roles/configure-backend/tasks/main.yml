@@ -18,3 +18,28 @@
     name: pm2
     global: yes
     state: present
+
+- name: install prometheus node_exporter
+  become: true
+  shell: |
+    useradd --no-create-home node_exporter
+    wget https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz
+    tar xzf node_exporter-1.0.1.linux-amd64.tar.gz
+    cp node_exporter-1.0.1.linux-amd64/node_exporter /usr/local/bin/node_exporter
+    rm -rf node_exporter-1.0.1.linux-amd64.tar.gz node_exporter-1.0.1.linux-amd64
+
+    echo "[Unit]" > /etc/systemd/system/node-exporter.service
+    echo "Description=Prometheus Node Exporter Service" >> /etc/systemd/system/node-exporter.service
+    echo $'After=network.target\n' >> /etc/systemd/system/node-exporter.service
+    echo "[Service]" >> /etc/systemd/system/node-exporter.service
+    echo "User=node_exporter" >> /etc/systemd/system/node-exporter.service
+    echo "Group=node_exporter" >> /etc/systemd/system/node-exporter.service
+    echo "Type=simple" >> /etc/systemd/system/node-exporter.service
+    echo $'ExecStart=/usr/local/bin/node_exporter\n' >> /etc/systemd/system/node-exporter.service
+    echo "[Install]" >> /etc/systemd/system/node-exporter.service
+    echo "WantedBy=multi-user.target" >> /etc/systemd/system/node-exporter.service
+
+    systemctl daemon-reload
+    systemctl enable node-exporter
+    systemctl start node-exporter
+    systemctl status node-exporter

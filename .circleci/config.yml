@@ -41,16 +41,22 @@ commands:
           name: Clear backend infrastructure
           command: |
             STACK_ID=$(curl -H 'token: 095cef7a-185c-43c6-aa1c-a479edebe4e7' --request GET https://api.memstash.io/values/previousworkflow)
-            STACK_NAME="udapeople-backend-${STACK_ID}"
-            aws cloudformation delete-stack --stack-name $STACK_NAME
+            if [ ! -z "$STACK_ID" ];
+            then
+              STACK_NAME="udapeople-backend-${STACK_ID}"
+              aws cloudformation delete-stack --stack-name $STACK_NAME
+            fi
       - run:
           name: Clear frontend infrastructure
           command: |
             STACK_ID=$(curl -H 'token: 095cef7a-185c-43c6-aa1c-a479edebe4e7' --request GET https://api.memstash.io/values/previousworkflow)
-            FILE_NAME="s3://udapeople-${STACK_ID}"
-            aws s3 rm $FILE_NAME --recursive
-            STACK_NAME="udapeople-frontend-${STACK_ID}"
-            aws cloudformation delete-stack --stack-name $STACK_NAME
+            if [ ! -z "$STACK_ID" ];
+            then
+              FILE_NAME="s3://udapeople-${STACK_ID}"
+              aws s3 rm $FILE_NAME --recursive
+              STACK_NAME="udapeople-frontend-${STACK_ID}"
+              aws cloudformation delete-stack --stack-name $STACK_NAME
+            fi
 
   install-ansible:
     description: Command that install ansible in an ubuntu machine
