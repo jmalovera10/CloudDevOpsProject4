@@ -30,12 +30,14 @@
 
     echo "[Unit]" > /etc/systemd/system/node-exporter.service
     echo "Description=Prometheus Node Exporter Service" >> /etc/systemd/system/node-exporter.service
-    echo $'After=network.target\n' >> /etc/systemd/system/node-exporter.service
+    echo "After=network.target" >> /etc/systemd/system/node-exporter.service
+    echo "" >> /etc/systemd/system/node-exporter.service
     echo "[Service]" >> /etc/systemd/system/node-exporter.service
     echo "User=node_exporter" >> /etc/systemd/system/node-exporter.service
     echo "Group=node_exporter" >> /etc/systemd/system/node-exporter.service
     echo "Type=simple" >> /etc/systemd/system/node-exporter.service
-    echo $'ExecStart=/usr/local/bin/node_exporter\n' >> /etc/systemd/system/node-exporter.service
+    echo "ExecStart=/usr/local/bin/node_exporter" >> /etc/systemd/system/node-exporter.service
+    echo "" >> /etc/systemd/system/node-exporter.service
     echo "[Install]" >> /etc/systemd/system/node-exporter.service
     echo "WantedBy=multi-user.target" >> /etc/systemd/system/node-exporter.service
 
