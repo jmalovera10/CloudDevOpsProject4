@@ -290,8 +290,9 @@ jobs:
           name: Deploy code to s3
           command: |
             cd ./frontend
-            API_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
-              --request GET https://api.memstash.io/values/backendurl) && npm run build
+            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
+              --request GET https://api.memstash.io/values/backendurl)
+            API_URL="$BACKEND_URL:3030" && npm run build
             aws s3 sync ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID}"
 
       - destroy-environment

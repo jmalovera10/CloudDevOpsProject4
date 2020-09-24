@@ -2,18 +2,22 @@
 
 https://github.com/jmalovera10/CloudDevOpsProject4
 
-### URL 2 (S3 bucket)
+### URL 2 (Circle CI Pipeline)
+
+https://app.circleci.com/pipelines/github/jmalovera10/CloudDevOpsProject4
+
+### URL 3 (S3 bucket)
 
 http://udapeople-59f08bbf-b89a-41f5-a70f-61308f153273.s3-website-us-east-1.amazonaws.com
 
-### URL 3 (CDN)
+### URL 4 (CDN)
 
 d1r58vis6hav1w.cloudfront.net
 
-### URL 4 (EC2 backend)
+### URL 5 (EC2 backend)
 
 ec2-34-236-249-248.compute-1.amazonaws.com
 
-### URL 5 (Prometheus)
+### URL 6 (Prometheus)
 
 ec2-34-234-234-180.compute-1.amazonaws.com
