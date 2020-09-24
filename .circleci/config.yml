@@ -40,23 +40,19 @@ commands:
       - run:
           name: Clear backend infrastructure
           command: |
-            STACK_ID=$(curl -H 'token: 095cef7a-185c-43c6-aa1c-a479edebe4e7' --request GET https://api.memstash.io/values/previousworkflow)
-            if [ "$STACK_ID" != "No value matches the provided token and key." ];
-            then
-              STACK_NAME="udapeople-backend-${STACK_ID}"
-              aws cloudformation delete-stack --stack-name $STACK_NAME
-            fi
+            CLOUDFRONT_ID=$(aws cloudformation describe-stack-resources --stack-name "udapeople-cdn" --query 'StackResources[?LogicalResourceId==`WebpageCDN`].PhysicalResourceId' --output text)
+            OLD_WORKFLOW_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Id=='${CLOUDFRONT_ID}'].Origins.Items[0].DomainName" --output text | sed -e 's/.s3.amazonaws.com//g' | sed -e 's/udapeople-//g')
+            STACK_NAME="udapeople-backend-${OLD_WORKFLOW_ID}"
+            aws cloudformation delete-stack --stack-name $STACK_NAME
       - run:
           name: Clear frontend infrastructure
           command: |
-            STACK_ID=$(curl -H 'token: 095cef7a-185c-43c6-aa1c-a479edebe4e7' --request GET https://api.memstash.io/values/previousworkflow)
-            if [ "$STACK_ID" != "No value matches the provided token and key."];
-            then
-              FILE_NAME="s3://udapeople-${STACK_ID}"
-              aws s3 rm $FILE_NAME --recursive
-              STACK_NAME="udapeople-frontend-${STACK_ID}"
-              aws cloudformation delete-stack --stack-name $STACK_NAME
-            fi
+            CLOUDFRONT_ID=$(aws cloudformation describe-stack-resources --stack-name "udapeople-cdn" --query 'StackResources[?LogicalResourceId==`WebpageCDN`].PhysicalResourceId' --output text)
+            OLD_WORKFLOW_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Id=='${CLOUDFRONT_ID}'].Origins.Items[0].DomainName" --output text | sed -e 's/.s3.amazonaws.com//g' | sed -e 's/udapeople-//g')
+            FILE_NAME="s3://udapeople-${OLD_WORKFLOW_ID}"
+            aws s3 rm $FILE_NAME --recursive
+            STACK_NAME="udapeople-frontend-${OLD_WORKFLOW_ID}"
+            aws cloudformation delete-stack --stack-name $STACK_NAME
 
   install-ansible:
     description: Command that install ansible in an ubuntu machine
@@ -229,7 +225,7 @@ jobs:
               --filters $FILTER \
               --query "Reservations[*].Instances[*].PublicIpAddress" \
               --output=text)
-            curl -H "Content-Type: text/plain" -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" \
               --request PUT \
               --data "${BACKEND_URL}" \
               "https://api.memstash.io/values/backendurl"
@@ -252,7 +248,7 @@ jobs:
       - run:
           name: Run ansible playbook
           command: |
-            BACKEND_URL=$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
+            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
               --request GET https://api.memstash.io/values/backendurl)
             cd ./.circleci/ansible/configure-server
             echo [web] > inventory.txt
@@ -293,10 +289,9 @@ jobs:
       - run:
           name: Deploy code to s3
           command: |
-            API_URL=$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
-              --request GET https://api.memstash.io/values/backendurl)
             cd ./frontend
-            npm run build
+            API_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
+              --request GET https://api.memstash.io/values/backendurl) && npm run build
             aws s3 sync ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID}"
 
       - destroy-environment
@@ -318,7 +313,7 @@ jobs:
       - run:
           name: Run ansible playbook
           command: |
-            BACKEND_URL=$(curl -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
+            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
               --request GET https://api.memstash.io/values/backendurl)
             ls ./backend/dist
             cp -R ./backend/dist ./.circleci/ansible/deploy/roles/deploy-code/files/dist
@@ -388,6 +383,7 @@ jobs:
             yum install -y nodejs
       - attach_workspace:
           at: .
+      - clean-environment
       - run:
           name: Update cloudfront with new bucket
           command: |
@@ -395,15 +391,6 @@ jobs:
               --template-body "file://.circleci/files/cloudfront.yml" \
               --stack-name "udapeople-cdn" \
               --parameters "ParameterKey=WorkflowID,ParameterValue=${CIRCLE_WORKFLOW_ID}" \
-
-      - clean-environment
-      - run:
-          name: Register old environment
-          command: |
-            curl -H "Content-Type: text/plain" -H "token: 095cef7a-185c-43c6-aa1c-a479edebe4e7" \
-              --request PUT \
-              --data "${CIRCLE_WORKFLOW_ID}" \
-              "https://api.memstash.io/values/previousworkflow"
       - destroy-environment
       - revert-migration
       - slack/status:
