@@ -50,7 +50,7 @@ commands:
             CLOUDFRONT_ID=$(aws cloudformation describe-stack-resources --stack-name "udapeople-cdn" --query 'StackResources[?LogicalResourceId==`WebpageCDN`].PhysicalResourceId' --output text)
             OLD_WORKFLOW_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Id=='${CLOUDFRONT_ID}'].Origins.Items[0].DomainName" --output text | sed -e 's/.s3.amazonaws.com//g' | sed -e 's/udapeople-//g')
             FILE_NAME="s3://udapeople-${OLD_WORKFLOW_ID}"
-            aws s3 rm $FILE_NAME --recursive
+            aws s3 rm $FILE_NAME --recursive || echo "Bucket does not exist"
             STACK_NAME="udapeople-frontend-${OLD_WORKFLOW_ID}"
             aws cloudformation delete-stack --stack-name $STACK_NAME
 
