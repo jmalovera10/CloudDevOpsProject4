@@ -29,7 +29,8 @@
     "migrations-win": "ts-node node_modules/typeorm/cli.js migration:run",
     "premigrations:revert": "npm run build",
     "migrations:revert": "ts-node -r dotenv/config node_modules/.bin/typeorm migration:revert",
-    "update:domain": "npm update @kiwihr/kiwi-domain"
+    "update:domain": "npm update @kiwihr/kiwi-domain",
+    "pm2": "SET ENVIRONMENT='production'&& SET TYPEORM_CONNECTION=postgres&& SET TYPEORM_ENTITIES=./dist/modules/domain/**/*.entity{.ts,.js}&& SET TYPEORM_HOST=udapeople1.c0dflfjnllnb.us-east-1.rds.amazonaws.com&&SET TYPEORM_PORT=5432 && SET TYPEORM_USERNAME=udapeople&& SET TYPEORM_PASSWORD=udapeople&& SET TYPEORM_DATABASE=udapeople&& node ./dist/main.js"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",

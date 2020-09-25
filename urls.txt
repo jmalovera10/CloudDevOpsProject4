@@ -6,18 +6,18 @@ https://github.com/jmalovera10/CloudDevOpsProject4
 
 https://app.circleci.com/pipelines/github/jmalovera10/CloudDevOpsProject4
 
-### URL 3 (S3 bucket)
+### URL 3 (Ansible Execution)
 
-http://udapeople-59f08bbf-b89a-41f5-a70f-61308f153273.s3-website-us-east-1.amazonaws.com
+https://app.circleci.com/pipelines/github/jmalovera10/CloudDevOpsProject4/98/workflows/625f8b6d-71c7-474e-a741-651234acbc2d/jobs/777
 
-### URL 4 (CDN)
+### URL 4 (S3 bucket)
 
-d1r58vis6hav1w.cloudfront.net
+http://udapeople-625f8b6d-71c7-474e-a741-651234acbc2d.s3-website-us-east-1.amazonaws.com
 
 ### URL 5 (EC2 backend)
 
-ec2-34-236-249-248.compute-1.amazonaws.com
+http://ec2-35-175-108-81.compute-1.amazonaws.com:3030
 
 ### URL 6 (Prometheus)
 
-ec2-34-234-234-180.compute-1.amazonaws.com
+http://ec2-3-235-231-151.compute-1.amazonaws.com:9090

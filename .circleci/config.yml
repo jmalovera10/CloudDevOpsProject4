@@ -292,7 +292,8 @@ jobs:
             cd ./frontend
             BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" \
               --request GET https://api.memstash.io/values/backendurl)
-            API_URL="$BACKEND_URL:3030" && npm run build
+            echo "API_URL=$BACKEND_URL:3030" > .env
+            npm run build:prod
             aws s3 sync ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID}"
 
       - destroy-environment
